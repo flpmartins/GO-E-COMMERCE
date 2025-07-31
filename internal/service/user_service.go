@@ -2,26 +2,82 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"tmp-api/internal/repository"
 )
 
-// UserService define a interface do serviço
 type UserService interface {
-	CreateUser(ctx context.Context, name, email string) (int, error)
-	// Adicione outros métodos necessários
+	CreateUser(ctx context.Context, name, email string) (repository.User, error)
+	GetUserByID(ctx context.Context, id int) (*repository.User, error)
+	GetAllUsers(ctx context.Context) ([]repository.User, error)
+	UpdateUser(ctx context.Context, id int, name, email string) error
+	DeleteUser(ctx context.Context, id int) error
 }
 
 type userService struct {
-	repo repository.UserRepository
+	repository repository.UserRepository
 }
 
-// NewUserService retorna uma implementação concreta
-func NewUserService(repo repository.UserRepository) UserService {
-	return &userService{repo: repo}
+func NewUserService(repository repository.UserRepository) UserService {
+	return &userService{repository: repository}
 }
 
-// Implemente os métodos da interface aqui
-func (s *userService) CreateUser(ctx context.Context, name, email string) (int, error) {
-	// Implementação
-	return 0, nil
+func (s *userService) CreateUser(ctx context.Context, name, email string) (repository.User, error) {
+	if name == "" {
+		return repository.User{}, fmt.Errorf("nome não pode ser vazio")
+	}
+	if email == "" {
+		return repository.User{}, fmt.Errorf("email não pode ser vazio")
+	}
+
+	user, err := s.repository.Create(ctx, name, email)
+	if err != nil {
+		return repository.User{}, fmt.Errorf("erro ao criar usuário no serviço: %w", err)
+	}
+
+	return user, nil
+}
+
+func (s *userService) GetUserByID(ctx context.Context, id int) (*repository.User, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("ID inválido")
+	}
+
+	user, err := s.repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar usuário: %w", err)
+	}
+
+	return user, nil
+}
+
+func (s *userService) GetAllUsers(ctx context.Context) ([]repository.User, error) {
+	users, err := s.repository.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao listar usuários: %w", err)
+	}
+
+	if len(users) == 0 {
+		return nil, fmt.Errorf("nenhum usuário encontrado")
+	}
+
+	return users, nil
+}
+
+func (s *userService) UpdateUser(ctx context.Context, id int, name, email string) error {
+	err := s.repository.Update(ctx, id, name, email)
+	if err != nil {
+		return fmt.Errorf("erro ao atualizar usuário: %w", err)
+	}
+
+	return nil
+}
+
+func (s *userService) DeleteUser(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return fmt.Errorf("erro ao deletar usuário: %w", err)
+	}
+
+	return nil
 }

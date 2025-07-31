@@ -13,7 +13,7 @@ func NewRouter(userHandler *handlers.UserHandler) *chi.Mux {
 		routes.Post("/", userHandler.CreateUser)
 		routes.Get("/", userHandler.GetAllUsers)
 		routes.Get("/{id}", userHandler.GetUser)
-		routes.Patch("/{id}", userHandler.UpdateUser)
+		routes.Put("/{id}", userHandler.UpdateUser)
 		routes.Delete("/{id}", userHandler.DeleteUser)
 	})
 
