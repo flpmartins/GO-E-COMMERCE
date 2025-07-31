@@ -1,0 +1,9 @@
+# .golangci.yml
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gofmt
+    - goimports
+    - revive
