@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 	"tmp-api/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, name, email string) (repository.User, error)
-	GetUserByID(ctx context.Context, id int) (*repository.User, error)
+	CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error)
 	GetAllUsers(ctx context.Context) ([]repository.User, error)
-	UpdateUser(ctx context.Context, id int, name, email string) error
-	DeleteUser(ctx context.Context, id int) error
+	UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
 
 type userService struct {
@@ -22,15 +24,21 @@ func NewUserService(repository repository.UserRepository) UserService {
 	return &userService{repository: repository}
 }
 
-func (s *userService) CreateUser(ctx context.Context, name, email string) (repository.User, error) {
+func (s *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
 	if name == "" {
 		return repository.User{}, fmt.Errorf("nome não pode ser vazio")
 	}
 	if email == "" {
 		return repository.User{}, fmt.Errorf("email não pode ser vazio")
 	}
+	if id_permission == "" {
+		return repository.User{}, fmt.Errorf("permissão não pode ser vazia")
+	}
+	if password == "" {
+		return repository.User{}, fmt.Errorf("senha não pode ser vazia")
+	}
 
-	user, err := s.repository.Create(ctx, name, email)
+	user, err := s.repository.Create(ctx, name, email, id_permission, password)
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao criar usuário no serviço: %w", err)
 	}
@@ -38,11 +46,7 @@ func (s *userService) CreateUser(ctx context.Context, name, email string) (repos
 	return user, nil
 }
 
-func (s *userService) GetUserByID(ctx context.Context, id int) (*repository.User, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("ID inválido")
-	}
-
+func (s *userService) GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error) {
 	user, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar usuário: %w", err)
@@ -64,8 +68,8 @@ func (s *userService) GetAllUsers(ctx context.Context) ([]repository.User, error
 	return users, nil
 }
 
-func (s *userService) UpdateUser(ctx context.Context, id int, name, email string) error {
-	err := s.repository.Update(ctx, id, name, email)
+func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error {
+	err := s.repository.Update(ctx, id, name, email, id_permission, password)
 	if err != nil {
 		return fmt.Errorf("erro ao atualizar usuário: %w", err)
 	}
@@ -73,7 +77,7 @@ func (s *userService) UpdateUser(ctx context.Context, id int, name, email string
 	return nil
 }
 
-func (s *userService) DeleteUser(ctx context.Context, id int) error {
+func (s *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	err := s.repository.Delete(ctx, id)
 	if err != nil {
 		return fmt.Errorf("erro ao deletar usuário: %w", err)
