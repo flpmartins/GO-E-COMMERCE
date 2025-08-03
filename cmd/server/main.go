@@ -37,11 +37,15 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
+
+	authService := service.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
 	permissionRepo := repository.NewPermissionRepository(db)
 	permissionService := service.NewPermissionService(permissionRepo)
 	permissionHandler := handlers.NewPermissionHandler(permissionService)
 
-	router := routes.NewRouter(userHandler, permissionHandler)
+	router := routes.NewRouter(userHandler, permissionHandler, authHandler)
 
 	fmt.Println("Servidor rodando na porta", port, "🚀⭐")
 

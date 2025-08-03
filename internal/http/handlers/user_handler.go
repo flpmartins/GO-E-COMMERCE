@@ -21,11 +21,11 @@ type UpdateUserRequest struct {
 	IdPermission *string `json:"id_permission"`
 }
 type UserHandler struct {
-	service   service.UserService
+	service   service.IUserService
 	validator *validator.Validate
 }
 
-func NewUserHandler(s service.UserService) *UserHandler {
+func NewUserHandler(s service.IUserService) *UserHandler {
 	return &UserHandler{service: s, validator: validator.New()}
 }
 

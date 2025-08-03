@@ -20,11 +20,11 @@ type UpdatePermissionRequest struct {
 }
 
 type PermissionHandler struct {
-	service   service.PermissionService
+	service   service.IPermissionService
 	validator *validator.Validate
 }
 
-func NewPermissionHandler(service service.PermissionService) *PermissionHandler {
+func NewPermissionHandler(service service.IPermissionService) *PermissionHandler {
 	return &PermissionHandler{service: service, validator: validator.New()}
 }
 

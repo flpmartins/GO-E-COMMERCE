@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type PermissionService interface {
+type IPermissionService interface {
 	CreatePermission(ctx context.Context, name, value string) (repository.Permission, error)
 	GetPermissionByID(ctx context.Context, id uuid.UUID) (*repository.Permission, error)
 	GetAllPermissions(ctx context.Context) ([]repository.Permission, error)
@@ -20,7 +20,7 @@ type permissionService struct {
 	repository repository.PermissionRepository
 }
 
-func NewPermissionService(repository repository.PermissionRepository) PermissionService {
+func NewPermissionService(repository repository.PermissionRepository) IPermissionService {
 	return &permissionService{repository: repository}
 }
 
@@ -55,8 +55,8 @@ func (service *permissionService) GetAllPermissions(ctx context.Context) ([]repo
 	return permissions, nil
 }
 
-func (service *permissionService) UpdatePermission(ctx context.Context, id uuid.UUID, name, value *string) error {
-	err := service.repository.Update(ctx, id, name, value)
+func (s *permissionService) UpdatePermission(ctx context.Context, id uuid.UUID, name, value *string) error {
+	err := s.repository.Update(ctx, id, name, value)
 	if err != nil {
 		return fmt.Errorf("erro ao atualizar permissão: %w", err)
 	}
@@ -64,8 +64,8 @@ func (service *permissionService) UpdatePermission(ctx context.Context, id uuid.
 	return nil
 }
 
-func (service *permissionService) DeletePermission(ctx context.Context, id uuid.UUID) error {
-	err := service.repository.Delete(ctx, id)
+func (s *permissionService) DeletePermission(ctx context.Context, id uuid.UUID) error {
+	err := s.repository.Delete(ctx, id)
 	if err != nil {
 		return fmt.Errorf("erro ao deletar permissão: %w", err)
 	}

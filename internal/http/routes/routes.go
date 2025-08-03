@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func NewRouter(userHandler *handlers.UserHandler, permissionHandler *handlers.PermissionHandler) *chi.Mux {
+func NewRouter(userHandler *handlers.UserHandler, permissionHandler *handlers.PermissionHandler, authHandler *handlers.AuthHandler) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Route("/users", func(r chi.Router) {
@@ -15,6 +15,10 @@ func NewRouter(userHandler *handlers.UserHandler, permissionHandler *handlers.Pe
 		r.Get("/{id}", userHandler.GetUser)
 		r.Put("/{id}", userHandler.UpdateUser)
 		r.Delete("/{id}", userHandler.DeleteUser)
+	})
+
+	router.Route("/login", func(r chi.Router) {
+		r.Post("/", authHandler.AuthUser)
 	})
 
 	router.Route("/permissions", func(r chi.Router) {

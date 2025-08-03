@@ -23,6 +23,7 @@ type UserRepository interface {
 	Create(ctx context.Context, name, email, id_permission, password string) (User, error)
 	GetAll(ctx context.Context) ([]User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*User, error)
+	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -80,6 +81,17 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*User, erro
 
 	var user User
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Name, &user.Email, &user.IdPermission, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `SELECT id, name, email, id_permission, password, created_at FROM users WHERE email = $1`
+
+	var user User
+	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Name, &user.Email, &user.IdPermission, &user.Password, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

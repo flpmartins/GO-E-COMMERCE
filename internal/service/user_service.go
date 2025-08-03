@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"tmp-api/internal/repository"
-	hash "tmp-api/pkg/hashx"
+	"tmp-api/pkg/hashx"
 
 	"github.com/google/uuid"
 )
 
-type UserService interface {
+type IUserService interface {
 	CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error)
 	GetAllUsers(ctx context.Context) ([]repository.User, error)
@@ -21,12 +21,12 @@ type userService struct {
 	repository repository.UserRepository
 }
 
-func NewUserService(repository repository.UserRepository) UserService {
+func NewUserService(repository repository.UserRepository) IUserService {
 	return &userService{repository: repository}
 }
 
 func (service *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
-	hashedPassword, err := hash.HashPassword(password)
+	hashedPassword, err := hashx.HashPassword(password)
 
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao gerar hash da senha: %w", err)
