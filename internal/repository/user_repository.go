@@ -23,7 +23,7 @@ type UserRepository interface {
 	Create(ctx context.Context, name, email, id_permission, password string) (User, error)
 	GetAll(ctx context.Context) ([]User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*User, error)
-	Update(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error
+	Update(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -86,7 +86,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*User, erro
 	return &user, nil
 }
 
-func (r *userRepository) Update(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error {
+func (r *userRepository) Update(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error {
 	setParts := []string{}
 	args := []interface{}{}
 	argPos := 1
@@ -106,12 +106,6 @@ func (r *userRepository) Update(ctx context.Context, id uuid.UUID, name, email, 
 	if id_permission != nil {
 		setParts = append(setParts, fmt.Sprintf("id_permission = $%d", argPos))
 		args = append(args, *id_permission)
-		argPos++
-	}
-
-	if password != nil {
-		setParts = append(setParts, fmt.Sprintf("password = $%d", argPos))
-		args = append(args, *password)
 		argPos++
 	}
 

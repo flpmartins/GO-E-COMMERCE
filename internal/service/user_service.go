@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"tmp-api/internal/repository"
+	hash "tmp-api/pkg/hashx"
 
 	"github.com/google/uuid"
 )
@@ -12,7 +13,7 @@ type UserService interface {
 	CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error)
 	GetAllUsers(ctx context.Context) ([]repository.User, error)
-	UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error
+	UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
 
@@ -25,7 +26,14 @@ func NewUserService(repository repository.UserRepository) UserService {
 }
 
 func (s *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
-	user, err := s.repository.Create(ctx, name, email, id_permission, password)
+	hashedPassword, err := hash.HashPassword(password)
+
+	if err != nil {
+		return repository.User{}, fmt.Errorf("erro ao gerar hash da senha: %w", err)
+	}
+
+	user, err := s.repository.Create(ctx, name, email, id_permission, hashedPassword)
+
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao criar usuário no serviço: %w", err)
 	}
@@ -55,8 +63,8 @@ func (s *userService) GetAllUsers(ctx context.Context) ([]repository.User, error
 	return users, nil
 }
 
-func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission, password *string) error {
-	err := s.repository.Update(ctx, id, name, email, id_permission, password)
+func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error {
+	err := s.repository.Update(ctx, id, name, email, id_permission)
 	if err != nil {
 		return fmt.Errorf("erro ao atualizar usuário: %w", err)
 	}

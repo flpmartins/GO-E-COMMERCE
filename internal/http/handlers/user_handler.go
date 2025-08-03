@@ -18,7 +18,6 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Name         *string `json:"name"`
 	Email        *string `json:"email"`
-	Password     *string `json:"password"`
 	IdPermission *string `json:"id_permission"`
 }
 type UserHandler struct {
@@ -99,7 +98,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.UpdateUser(r.Context(), id, request.Name, request.Email, request.IdPermission, request.Password)
+	err = h.service.UpdateUser(r.Context(), id, request.Name, request.Email, request.IdPermission)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
