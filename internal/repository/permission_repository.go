@@ -33,12 +33,12 @@ func NewPermissionRepository(db *sql.DB) PermissionRepository {
 	return &permissionRepository{db: db}
 }
 
-func (r *permissionRepository) Create(ctx context.Context, name, value string) (Permission, error) {
+func (repository *permissionRepository) Create(ctx context.Context, name, value string) (Permission, error) {
 	query := `INSERT INTO permissions (id, name, value) VALUES ($1, $2, $3) RETURNING id, name, value, created_at`
 	id := uuid.New()
 	var permission Permission
 
-	err := r.db.QueryRowContext(ctx, query, id, name, value).Scan(
+	err := repository.db.QueryRowContext(ctx, query, id, name, value).Scan(
 		&permission.ID,
 		&permission.Name,
 		&permission.Value,
@@ -51,9 +51,9 @@ func (r *permissionRepository) Create(ctx context.Context, name, value string) (
 	return permission, nil
 }
 
-func (r *permissionRepository) GetAll(ctx context.Context) ([]Permission, error) {
+func (repository *permissionRepository) GetAll(ctx context.Context) ([]Permission, error) {
 	query := `SELECT id, name, value, created_at FROM permissions`
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := repository.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -71,18 +71,18 @@ func (r *permissionRepository) GetAll(ctx context.Context) ([]Permission, error)
 	return permissions, nil
 }
 
-func (r *permissionRepository) GetByID(ctx context.Context, id uuid.UUID) (*Permission, error) {
+func (repository *permissionRepository) GetByID(ctx context.Context, id uuid.UUID) (*Permission, error) {
 	query := `SELECT id, name, value, created_at FROM permissions WHERE id = $1`
 
 	var permission Permission
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&permission.ID, &permission.Name, &permission.Value, &permission.CreatedAt)
+	err := repository.db.QueryRowContext(ctx, query, id).Scan(&permission.ID, &permission.Name, &permission.Value, &permission.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
 	return &permission, nil
 }
 
-func (r *permissionRepository) Update(ctx context.Context, id uuid.UUID, name, value *string) error {
+func (repository *permissionRepository) Update(ctx context.Context, id uuid.UUID, name, value *string) error {
 	setParts := []string{}
 	args := []interface{}{}
 	argPos := 1
@@ -106,12 +106,12 @@ func (r *permissionRepository) Update(ctx context.Context, id uuid.UUID, name, v
 	query := fmt.Sprintf("UPDATE permissions SET %s WHERE id = $%d", strings.Join(setParts, ", "), argPos)
 	args = append(args, id)
 
-	_, err := r.db.ExecContext(ctx, query, args...)
+	_, err := repository.db.ExecContext(ctx, query, args...)
 	return err
 }
 
-func (r *permissionRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (repository *permissionRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM permissions WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, id)
+	_, err := repository.db.ExecContext(ctx, query, id)
 	return err
 }

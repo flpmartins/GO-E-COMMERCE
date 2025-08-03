@@ -25,14 +25,14 @@ func NewUserService(repository repository.UserRepository) UserService {
 	return &userService{repository: repository}
 }
 
-func (s *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
+func (service *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
 	hashedPassword, err := hash.HashPassword(password)
 
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao gerar hash da senha: %w", err)
 	}
 
-	user, err := s.repository.Create(ctx, name, email, id_permission, hashedPassword)
+	user, err := service.repository.Create(ctx, name, email, id_permission, hashedPassword)
 
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao criar usuário no serviço: %w", err)
@@ -41,8 +41,8 @@ func (s *userService) CreateUser(ctx context.Context, name, email, id_permission
 	return user, nil
 }
 
-func (s *userService) GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error) {
-	user, err := s.repository.GetByID(ctx, id)
+func (service *userService) GetUserByID(ctx context.Context, id uuid.UUID) (*repository.User, error) {
+	user, err := service.repository.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar usuário: %w", err)
 	}
@@ -50,8 +50,8 @@ func (s *userService) GetUserByID(ctx context.Context, id uuid.UUID) (*repositor
 	return user, nil
 }
 
-func (s *userService) GetAllUsers(ctx context.Context) ([]repository.User, error) {
-	users, err := s.repository.GetAll(ctx)
+func (service *userService) GetAllUsers(ctx context.Context) ([]repository.User, error) {
+	users, err := service.repository.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao listar usuários: %w", err)
 	}
@@ -63,8 +63,8 @@ func (s *userService) GetAllUsers(ctx context.Context) ([]repository.User, error
 	return users, nil
 }
 
-func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error {
-	err := s.repository.Update(ctx, id, name, email, id_permission)
+func (service *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email, id_permission *string) error {
+	err := service.repository.Update(ctx, id, name, email, id_permission)
 	if err != nil {
 		return fmt.Errorf("erro ao atualizar usuário: %w", err)
 	}
@@ -72,8 +72,8 @@ func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, email,
 	return nil
 }
 
-func (s *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	err := s.repository.Delete(ctx, id)
+func (service *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	err := service.repository.Delete(ctx, id)
 	if err != nil {
 		return fmt.Errorf("erro ao deletar usuário: %w", err)
 	}

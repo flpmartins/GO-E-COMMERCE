@@ -24,8 +24,8 @@ func NewPermissionService(repository repository.PermissionRepository) Permission
 	return &permissionService{repository: repository}
 }
 
-func (s *permissionService) CreatePermission(ctx context.Context, name, value string) (repository.Permission, error) {
-	permission, err := s.repository.Create(ctx, name, value)
+func (service *permissionService) CreatePermission(ctx context.Context, name, value string) (repository.Permission, error) {
+	permission, err := service.repository.Create(ctx, name, value)
 	if err != nil {
 		return repository.Permission{}, fmt.Errorf("erro ao criar permissão no serviço: %w", err)
 	}
@@ -33,8 +33,8 @@ func (s *permissionService) CreatePermission(ctx context.Context, name, value st
 	return permission, nil
 }
 
-func (s *permissionService) GetPermissionByID(ctx context.Context, id uuid.UUID) (*repository.Permission, error) {
-	permission, err := s.repository.GetByID(ctx, id)
+func (service *permissionService) GetPermissionByID(ctx context.Context, id uuid.UUID) (*repository.Permission, error) {
+	permission, err := service.repository.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar permissão: %w", err)
 	}
@@ -42,8 +42,8 @@ func (s *permissionService) GetPermissionByID(ctx context.Context, id uuid.UUID)
 	return permission, nil
 }
 
-func (s *permissionService) GetAllPermissions(ctx context.Context) ([]repository.Permission, error) {
-	permissions, err := s.repository.GetAll(ctx)
+func (service *permissionService) GetAllPermissions(ctx context.Context) ([]repository.Permission, error) {
+	permissions, err := service.repository.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao listar permissões: %w", err)
 	}
@@ -55,8 +55,8 @@ func (s *permissionService) GetAllPermissions(ctx context.Context) ([]repository
 	return permissions, nil
 }
 
-func (s *permissionService) UpdatePermission(ctx context.Context, id uuid.UUID, name, value *string) error {
-	err := s.repository.Update(ctx, id, name, value)
+func (service *permissionService) UpdatePermission(ctx context.Context, id uuid.UUID, name, value *string) error {
+	err := service.repository.Update(ctx, id, name, value)
 	if err != nil {
 		return fmt.Errorf("erro ao atualizar permissão: %w", err)
 	}
@@ -64,8 +64,8 @@ func (s *permissionService) UpdatePermission(ctx context.Context, id uuid.UUID, 
 	return nil
 }
 
-func (s *permissionService) DeletePermission(ctx context.Context, id uuid.UUID) error {
-	err := s.repository.Delete(ctx, id)
+func (service *permissionService) DeletePermission(ctx context.Context, id uuid.UUID) error {
+	err := service.repository.Delete(ctx, id)
 	if err != nil {
 		return fmt.Errorf("erro ao deletar permissão: %w", err)
 	}

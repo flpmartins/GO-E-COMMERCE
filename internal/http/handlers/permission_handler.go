@@ -28,7 +28,7 @@ func NewPermissionHandler(service service.PermissionService) *PermissionHandler 
 	return &PermissionHandler{service: service, validator: validator.New()}
 }
 
-func (h *PermissionHandler) CreatePermission(w http.ResponseWriter, r *http.Request) {
+func (handler *PermissionHandler) CreatePermission(w http.ResponseWriter, r *http.Request) {
 	var req CreatePermissionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -36,12 +36,12 @@ func (h *PermissionHandler) CreatePermission(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := h.validator.Struct(req); err != nil {
+	if err := handler.validator.Struct(req); err != nil {
 		httpx.WriteValidationErrors(w, err)
 		return
 	}
 
-	permission, err := h.service.CreatePermission(r.Context(), req.Name, req.Value)
+	permission, err := handler.service.CreatePermission(r.Context(), req.Name, req.Value)
 	if err != nil {
 		httpx.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -50,14 +50,14 @@ func (h *PermissionHandler) CreatePermission(w http.ResponseWriter, r *http.Requ
 	httpx.WriteJSON(w, http.StatusCreated, permission)
 }
 
-func (h *PermissionHandler) GetPermission(w http.ResponseWriter, r *http.Request) {
+func (handler *PermissionHandler) GetPermission(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	permission, err := h.service.GetPermissionByID(r.Context(), id)
+	permission, err := handler.service.GetPermissionByID(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -67,8 +67,8 @@ func (h *PermissionHandler) GetPermission(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(permission)
 }
 
-func (h *PermissionHandler) GetAllPermissions(w http.ResponseWriter, r *http.Request) {
-	permissions, err := h.service.GetAllPermissions(r.Context())
+func (handler *PermissionHandler) GetAllPermissions(w http.ResponseWriter, r *http.Request) {
+	permissions, err := handler.service.GetAllPermissions(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,7 +83,7 @@ func (h *PermissionHandler) GetAllPermissions(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(permissions)
 }
 
-func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Request) {
+func (handler *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, err.Error())
@@ -97,7 +97,7 @@ func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = h.service.UpdatePermission(r.Context(), id, request.Name, request.Value)
+	err = handler.service.UpdatePermission(r.Context(), id, request.Name, request.Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -106,13 +106,13 @@ func (h *PermissionHandler) UpdatePermission(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *PermissionHandler) DeletePermission(w http.ResponseWriter, r *http.Request) {
+func (handler *PermissionHandler) DeletePermission(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	err = h.service.DeletePermission(r.Context(), id)
+	err = handler.service.DeletePermission(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

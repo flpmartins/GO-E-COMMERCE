@@ -29,19 +29,19 @@ func NewUserHandler(s service.UserService) *UserHandler {
 	return &UserHandler{service: s, validator: validator.New()}
 }
 
-func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	if err := h.validator.Struct(req); err != nil {
+	if err := handler.validator.Struct(req); err != nil {
 		httpx.WriteValidationErrors(w, err)
 		return
 	}
 
-	user, err := h.service.CreateUser(r.Context(), req.Name, req.Email, req.IdPermission, req.Password)
+	user, err := handler.service.CreateUser(r.Context(), req.Name, req.Email, req.IdPermission, req.Password)
 
 	if err != nil {
 		httpx.WriteError(w, http.StatusInternalServerError, err.Error())
@@ -51,14 +51,14 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, user)
 }
 
-func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user, err := h.service.GetUserByID(r.Context(), id)
+	user, err := handler.service.GetUserByID(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -68,8 +68,8 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.service.GetAllUsers(r.Context())
+func (handler *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := handler.service.GetAllUsers(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -84,7 +84,7 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var request UpdateUserRequest
 
 	id, err := httpx.ParseUUIDParam(r, "id")
@@ -98,7 +98,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.UpdateUser(r.Context(), id, request.Name, request.Email, request.IdPermission)
+	err = handler.service.UpdateUser(r.Context(), id, request.Name, request.Email, request.IdPermission)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -107,14 +107,14 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.service.DeleteUser(r.Context(), id)
+	err = handler.service.DeleteUser(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
