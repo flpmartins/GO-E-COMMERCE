@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"tmp-api/configs"
+	"tmp-api/internal/configs"
 	"tmp-api/internal/http/handlers"
 	"tmp-api/internal/http/routes"
 	"tmp-api/internal/repository"
@@ -36,12 +36,13 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
+	permissionRepo := repository.NewPermissionRepository(db)
+	permissionService := service.NewPermissionService(permissionRepo)
+	permissionHandler := handlers.NewPermissionHandler(permissionService)
 
-	router := routes.NewRouter(userHandler)
+	router := routes.NewRouter(userHandler, permissionHandler)
 
 	fmt.Println("Servidor rodando na porta", port, "🚀⭐")
-
-	http.ListenAndServe(":8080", router)
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal("Erro ao iniciar servidor: ", err)

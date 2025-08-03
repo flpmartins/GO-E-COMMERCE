@@ -4,54 +4,57 @@ import (
 	"encoding/json"
 	"net/http"
 	"tmp-api/internal/service"
+	"tmp-api/pkg/httpx"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
+	"github.com/go-playground/validator/v10"
 )
 
+type CreateUserRequest struct {
+	Name         string `json:"name" validate:"required"`
+	Email        string `json:"email" validate:"required,email"`
+	Password     string `json:"password" validate:"required,min=6"`
+	IdPermission string `json:"id_permission" validate:"required,uuid4"`
+}
+type UpdateUserRequest struct {
+	Name         *string `json:"name"`
+	Email        *string `json:"email"`
+	Password     *string `json:"password"`
+	IdPermission *string `json:"id_permission"`
+}
 type UserHandler struct {
-	service service.UserService
+	service   service.UserService
+	validator *validator.Validate
 }
 
 func NewUserHandler(s service.UserService) *UserHandler {
-	return &UserHandler{service: s}
+	return &UserHandler{service: s, validator: validator.New()}
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		Name         string `json:"name"`
-		Email        string `json:"email"`
-		Password     string `json:"password"`
-		IdPermission string `json:"id_permission"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	var req CreateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	user, err := h.service.CreateUser(r.Context(), request.Name, request.Email, request.IdPermission, request.Password)
+	if err := h.validator.Struct(req); err != nil {
+		httpx.WriteValidationErrors(w, err)
+		return
+	}
+
+	user, err := h.service.CreateUser(r.Context(), req.Name, req.Email, req.IdPermission, req.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpx.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	httpx.WriteJSON(w, http.StatusCreated, user)
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-
-	if idStr == "" {
-		http.Error(w, "ID não fornecido", http.StatusBadRequest)
-		return
-	}
-
-	id, err := uuid.Parse(idStr)
+	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
-		http.Error(w, "Formato de UUID inválido", http.StatusBadRequest)
+		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -82,24 +85,12 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
+	var request UpdateUserRequest
 
-	if idStr == "" {
-		http.Error(w, "ID não fornecido", http.StatusBadRequest)
-		return
-	}
-
-	id, err := uuid.Parse(idStr)
+	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
-		http.Error(w, "Formato de UUID inválido", http.StatusBadRequest)
+		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
-	}
-
-	var request struct {
-		Name         *string `json:"name"`
-		Email        *string `json:"email"`
-		Password     *string `json:"password"`
-		IdPermission *string `json:"id_permission"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -117,16 +108,9 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-
-	if idStr == "" {
-		http.Error(w, "ID não fornecido", http.StatusBadRequest)
-		return
-	}
-
-	id, err := uuid.Parse(idStr)
+	id, err := httpx.ParseUUIDParam(r, "id")
 	if err != nil {
-		http.Error(w, "Formato de UUID inválido", http.StatusBadRequest)
+		httpx.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
