@@ -51,6 +51,7 @@ func (r *userRepository) Create(ctx context.Context, name, email, id_permission,
 	if err != nil {
 		return user, fmt.Errorf("erro ao criar usuário: %w", err)
 	}
+
 	return user, nil
 }
 

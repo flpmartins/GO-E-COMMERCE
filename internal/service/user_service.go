@@ -25,19 +25,6 @@ func NewUserService(repository repository.UserRepository) UserService {
 }
 
 func (s *userService) CreateUser(ctx context.Context, name, email, id_permission, password string) (repository.User, error) {
-	if name == "" {
-		return repository.User{}, fmt.Errorf("nome não pode ser vazio")
-	}
-	if email == "" {
-		return repository.User{}, fmt.Errorf("email não pode ser vazio")
-	}
-	if id_permission == "" {
-		return repository.User{}, fmt.Errorf("permissão não pode ser vazia")
-	}
-	if password == "" {
-		return repository.User{}, fmt.Errorf("senha não pode ser vazia")
-	}
-
 	user, err := s.repository.Create(ctx, name, email, id_permission, password)
 	if err != nil {
 		return repository.User{}, fmt.Errorf("erro ao criar usuário no serviço: %w", err)

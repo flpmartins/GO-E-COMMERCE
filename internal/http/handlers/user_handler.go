@@ -43,6 +43,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.service.CreateUser(r.Context(), req.Name, req.Email, req.IdPermission, req.Password)
+
 	if err != nil {
 		httpx.WriteError(w, http.StatusInternalServerError, err.Error())
 		return

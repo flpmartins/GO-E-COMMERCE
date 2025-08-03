@@ -25,13 +25,6 @@ func NewPermissionService(repository repository.PermissionRepository) Permission
 }
 
 func (s *permissionService) CreatePermission(ctx context.Context, name, value string) (repository.Permission, error) {
-	if name == "" {
-		return repository.Permission{}, fmt.Errorf("nome não pode ser vazio")
-	}
-	if value == "" {
-		return repository.Permission{}, fmt.Errorf("valor não pode ser vazio")
-	}
-
 	permission, err := s.repository.Create(ctx, name, value)
 	if err != nil {
 		return repository.Permission{}, fmt.Errorf("erro ao criar permissão no serviço: %w", err)

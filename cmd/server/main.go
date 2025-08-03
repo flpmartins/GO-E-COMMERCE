@@ -31,6 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Erro ao conectar ao banco: ", err)
 	}
+
 	defer db.Close()
 
 	userRepo := repository.NewUserRepository(db)
