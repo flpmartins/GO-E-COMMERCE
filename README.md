@@ -18,12 +18,13 @@ API RESTful para gerenciamento de um sistema e-commerce, construída em Go com P
 ## 📦 Funcionalidades
 
 - ✅ Autenticação de usuários (login com JWT)
-- 🛍️ CRUD de produtos, categorias e permissões
-- 🧾 Carrinho de compras (WIP)
-- 📦 Pedidos e histórico (em desenvolvimento)
-- 👤 Gestão de usuários e perfis
 - 🔐 Validações com `validator.v10`
 - 📄 Respostas padronizadas (`httpx`)
+- 🛍️ CRUD de produtos, categorias e permissões (em desenvolvimento)
+- 🧾 Carrinho de compras (WIP) (em desenvolvimento)
+- 📦 Pedidos e histórico (em desenvolvimento)
+- 👤 Gestão de usuários e perfis (em desenvolvimento)
+
 
 ---
 
