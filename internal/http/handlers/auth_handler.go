@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"tmp-api/internal/service"
 	"tmp-api/pkg/httpx"
+	"tmp-api/pkg/tokenx"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -28,6 +29,7 @@ func NewAuthHandler(service service.IAuthService) *AuthHandler {
 
 func (h *AuthHandler) AuthUser(w http.ResponseWriter, r *http.Request) {
 	var req AuthUserRequest
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -45,5 +47,20 @@ func (h *AuthHandler) AuthUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.WriteJSON(w, http.StatusOK, user)
+	tokenString, err := tokenx.GenerateToken(user.ID.String())
+
+	if err != nil {
+		httpx.WriteError(w, http.StatusInternalServerError, "Erro ao gerar token")
+		return
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"token": tokenString,
+		"user": map[string]interface{}{
+			"id":            user.ID,
+			"name":          user.Name,
+			"email":         user.Email,
+			"id_permission": user.IdPermission,
+		},
+	})
 }
